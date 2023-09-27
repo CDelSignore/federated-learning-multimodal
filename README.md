@@ -37,6 +37,7 @@ Machine learning has become an increasingly crucial skill in the embedded domain
 
 ## System Blocks
 
+Borrowed from the original research:
 ![Multimodal Model](doc/multimodal-fed-model.jpg)
 
 ## Timeline
