@@ -73,7 +73,7 @@ For setup, I created a Windows Subsystem for Linux (WSL) installation of Ubuntu 
 
 The provided code for `Main.py` did not work for me out of the box. In particular:
 ```python
-return np.mean(win_loss), np.mean(win_accuracy), np.mean(win_f1)
+return np.mean(win_loss), np.mean(win_accuracy), np.mean(win_weighted_f1)
 ```
 was returning an error because `win_weighted_f1` was undefined in this scope. Looking through the file, I noticed:
 ```python 
