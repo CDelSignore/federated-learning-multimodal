@@ -4,31 +4,116 @@ import logging
 import os
 import warnings
 import torch
-from mpi4py import MPI
 from fl import FL
 
+data_configs = [
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/ablation/acce_rgb/A30_B30_AB0_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/ablation/acce_rgb/A30_B30_AB0_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/ablation/rgb_depth/A30_B30_AB0_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/ablation/rgb_depth/A30_B30_AB0_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/ablation/acce_depth/A30_B30_AB0_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/ablation/acce_depth/A30_B30_AB0_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A30_B0_AB0_label_A_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A0_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A0_B0_AB30_label_AB_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A0_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A10_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A10_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A0_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A10_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A0_B0_AB30_label_AB_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A0_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A0_B30_AB0_label_B_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_rgb/A10_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A30_B0_AB0_label_A_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A0_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A0_B0_AB30_label_AB_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A0_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A10_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A10_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A0_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A10_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A0_B0_AB30_label_AB_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A0_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A0_B30_AB0_label_B_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/rgb_depth/A10_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A30_B0_AB0_label_A_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A0_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A0_B0_AB30_label_AB_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A0_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A10_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A10_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A0_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A10_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A0_B0_AB30_label_AB_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A0_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A0_B30_AB0_label_B_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/ur_fall/split_ae/acce_depth/A10_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/ablation/acce_gyro/A30_B30_AB0_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/ablation/acce_gyro/A30_B30_AB0_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/ablation/acce_mage/A30_B30_AB0_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/ablation/acce_mage/A30_B30_AB0_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/ablation/gyro_mage/A30_B30_AB0_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/ablation/gyro_mage/A30_B30_AB0_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A30_B0_AB0_label_A_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A0_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A0_B0_AB30_label_AB_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A0_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A10_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A10_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A0_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A10_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A0_B0_AB30_label_AB_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A0_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A0_B30_AB0_label_B_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_gyro/A10_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A30_B0_AB0_label_A_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A0_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A0_B0_AB30_label_AB_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A0_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A10_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A10_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A0_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A10_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A0_B0_AB30_label_AB_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A0_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A0_B30_AB0_label_B_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/acce_mage/A10_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A30_B0_AB0_label_A_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A0_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A0_B0_AB30_label_AB_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A0_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A10_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A10_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A0_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A10_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A0_B0_AB30_label_AB_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A0_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A0_B30_AB0_label_B_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/mhealth/split_ae/gyro_mage/A10_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A30_B0_AB0_label_A_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A0_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A0_B0_AB30_label_AB_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A0_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A10_B10_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A10_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A0_B0_AB30_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A10_B10_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A0_B0_AB30_label_AB_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A0_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A0_B30_AB0_label_B_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/dccae/A10_B0_AB30_label_A_test_B',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/ablation/A30_B30_AB0_label_B_test_A',
+    '/home/collin/Desktop/iotdi22-mmfl/config/opp/ablation/A30_B30_AB0_label_A_test_B'
+]
 
-# For MPI experiments
-COMM = MPI.COMM_WORLD
-RANK = COMM.Get_rank()
-
-
-def main():
-    is_mpi = COMM.Get_size() != 1
-    config = read_config()
-    fl = FL(config, is_mpi, RANK)
-    fl.start()
-
-
-def read_config():
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("--config", type=str,
-                            help="name of the config file of simulation")
-    args = arg_parser.parse_args()
+def read_config(path):
     config = configparser.ConfigParser()
-    config.read(args.config)
+    config.read(path)
+
     return config
 
-
-if __name__ == "__main__":
-    main()
+for path in data_configs:
+    config = read_config(path)
+    fl = FL(config)
+    fl.start()
