@@ -1,20 +1,31 @@
-This repository contains the source code and data of the paper [Multimodal
-Federated Learning on IoT Data](https://arxiv.org/abs/2109.04833).
+# Federated Learning on Multimodal Sensor Data
 
-# Directory structure
-* *src*: source code
-* *data*: pre-processed data
-* *config*: configuration files for experiments
-* *sub*: pbs files for job submissions to clusters
-* *results*: experimental results
-* *plots*: data visualizations of results
+UMass Amherst ECE535: Networked Embedded System Design Fall 2023
 
-# Prerequisites
-To fully re-produce the results and plots in the paper, please use the provided
-configuration files to run replicates of individual experiments in parallel on a
-cluster that supports MPI. On your cluster, you need following modules available
-to support the experiments.
+## Authors
 
+- [@CDelSignore](https://www.github.com/CDelSignore) - Responsible for everything because it's a group of 1.
+
+## Motivation
+
+Machine learning has become an increasingly crucial skill in the embedded domain, which has not yet been reflected in the UMass curriculum. Having worked at a company that designs sensor systems for data logging, I am interested to explore federated learning and see if it might provide key advantages for such a system.
+
+## Design Goals
+
+* Implement per-class accuracy reporting
+* Analyze the train and test data distribution
+* Visualize and report findings
+
+## Deliverables
+
+* Understand multimodal federated learning
+* Reproduce the results of the underlying research paper
+* Perform per-class accuracy analysis and observe effect of skewed data distribution
+* Evaluate the system on a multimodal dataset that is relatively balance in class distribution
+
+## Requirements
+
+* [IoT Dataset](https://drive.google.com/drive/folders/1rWJYkfMavGs1F-H0jykJ5V0fIiwrQdJV)
 * Anaconda 3
 * Python 3.7+
 * Pytorch 1.8+
@@ -24,54 +35,56 @@ to support the experiments.
 * Scipy 1.4+
 * MPI for Python 3.0+
 
-# Pre-processed data
-The *data* directory contains the pre-processed data for the experiments. You can download the data in *.mat* files from https://drive.google.com/drive/folders/1rWJYkfMavGs1F-H0jykJ5V0fIiwrQdJV?usp=sharing.
-You can also generate the pre-processed data from the original datasets.
+## System Blocks
 
-## For the Opp dataset
-1. Download the dataset publicly available at
-    http://www.opportunity-project.eu/system/files/Challenge/OpportunityChallengeLabeled.zip.
-2. Extract all the *.dat* files into the *data/opp* directory.
-3. Uncomment the `# gen_opp("data")` in `utils.py` and run `python3 src/utils.py` (it will take a few minutes).
-4. Once it's completed, you should find a generated **opp.mat** file in *data/opp/*.
+Borrowed from the original research:  
 
-## For the mHealth dataset
-1. Download the dataset publicly available at
-https://archive.ics.uci.edu/ml/machine-learning-databases/00319/MHEALTHDATASET.zip.
-2. Extract all the *.log* files into the *data/mhealth* directory.
-3. Uncomment the `# gen_mhealth("data")` in `utils.py` and run `python3 src/utils.py` (it will take a few minutes).
-4. Once it's completed, you should find a generated **mhealth.mat** file in *data/mhealth/*.
+![Multimodal Model](doc/multimodal-fed-model.jpg)
 
-## For the UR Fall dataset
-1. Uncomment the `# download_UR_fall()` and `# gen_ur_fall("data")` in the `utils.py`.
-2. Run `python3 src/utils.py` to download the raw data and generate the pre-processed data (it will take a few minutes).
-3. Once it's completed, you should find a generated **ur_fall.mat** file in *data/mhealth/*.
+## Timeline
 
-# Configuration files
-The *config/* directory contains the configuration files of experiments. Each
-file describes the parameters of one individual experiment. The
-**config/config_example** file contains the explanations of all the parameters.
+[09/26/23] - Project proposal  
+[09/27/23] - Create repository  
+[10/01/23] - Complete foundational research
 
-# Job submission files
-The *sub/* directory contains the job submission files to HPC clusters. Each
-file uses `mpirun` to run 64 replicates of simulation using a specific
-configuration file. You may need to adjust the walltime, number of nodes and
-CPUs, and size of memory according to the policy of your clusters (i.e., the
-first 3 lines). It uses `module load` to load an Anaconda3 module named as
-"anaconda3/personal" and an MPI module named as "mpi" for simulations. Change
-them to suit your cluster's environment, if necessary. The \$PBS_O_WORKDIR\$ is
-the absolute path of the current working directory of the `qsub` utility
-process.
+Other timeframes to be decided when information posted to Moodle
 
-# Instructions
-1. Create a conda environment (with Python 3.7+) named as **deep-learning** on
-your HPC cluster.
-2. Install pytorch, torchvision, numpy, matplotlib, scipy, and mpi4py in your
-**deep-learning** environment.
-3. Use the provided *.sh* files to run groups of experiments. For
-example, the exp_opp.sh will use `qsub` to submit all the pbs files of the Opp
-experiments to the queue system of your cluster.
-4. With the provided configuration files, the results will be output in the
-*results/* directory.
-5. Once ALL experiments are completed, run `python3 src/analysis.py` to output
-data visualizations of the results into the *plots/* directory.
+## References
+
+ - [Underlying Research Paper](https://arxiv.org/pdf/2109.04833.pdf)
+ - [Underlying Code Repository](https://github.com/yuchenzhao/iotdi22-mmfl)
+ - [Deep Learning Fundamentals](https://www.youtube.com/watch?v=gZmobeGL0Yg&list=PLZbbT5o_s2xq7LwI2y8_QtvuXZedL6tQU)
+ - [PyTorch Fundamentals](https://www.youtube.com/watch?v=v5cngxo4mIg&list=PLZbbT5o_s2xrfNyHZsM6ufI0iZENK9xgG)
+ - [Federated Learning Fundamentals](https://www.youtube.com/watch?v=X8YYWunttOY)
+ - [Federated Learning Research](http://proceedings.mlr.press/v54/mcmahan17a/mcmahan17a.pdf)
+
+# ECE 535 Project Check In
+
+Collin DelSignore (30800923)  
+Federated Learning on Multimodal Sensor Data
+
+## Setup & Research
+
+I spent a lot of time reading the source paper and seeking out additional publications to understand what Federated Learning is, why it's important and relevant, and what the significance of this particular project is.
+
+For setup, I created a Windows Subsystem for Linux (WSL) installation of Ubuntu and installed Miniconda to help control the dependencies for the project, using the suggested deep-learning Conda environment. I have a working installation with the proper data and paths configured, and am currently porting everything to a dedicated Ubuntu Server host so that I can SSH into my project from campus.
+
+## Implementation
+
+The provided code for `Main.py` did not work for me out of the box. In particular:
+```python
+return np.mean(win_loss), np.mean(win_accuracy), np.mean(win_weighted_f1)
+```
+was returning an error because `win_weighted_f1` was undefined in this scope. Looking through the file, I noticed:
+```python 
+win_f1.append(weighted_f1)
+```
+Substituting for this `win_f1` variable allowed my models to train. I created a bash script to index all the config files and modified my `Main.py` to accept parameterized file paths. This way I was able to "set and forget" my machine and train all the datasets in series. However, I ran into additional roadblocks when running the analysis. It seems that within `fl.py`, there is a check for `self.is_mpi`, which is FALSE. This means that there is no "rep_x" appended to the filepath. There is no such check in `analysis.py`, meaning that it cannot find the results files for analysis. I changed those lines of code and was able to run analysis.
+
+## Deliverables
+
+Over the next few days, I am hoping to finish verifying that my analysis matches the paper. Initial checks seem to indicate that there are minor differences, but I haven't explored the accuracy particularly closely yet.
+
+Main deliverables before the next check in are to complete the differential analysis and to begin modifying to attain per-class accuracy. In addition, once the remote server is set up, I am going to begin taking better advantage of `Git` to manage the local repository and send upstream to the created Github repo. As it stands, I have been working locally since I am in a team by myself.
+
+One of my groupmates for the 535 discussion is also working by himself on this topic, and asked if he could join this project. If his request is approved, I will expand the deliverables to reflect the increased output potential of a 2-person group.
