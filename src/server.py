@@ -221,7 +221,7 @@ class Server:
         """
 
         classes, instances = np.unique(data_test["y"], return_index = True)
-        class_accuracy = []
+        class_accuracy = [0] * len(classes)
 
         self.global_ae.eval()
         self.global_sv.eval()
@@ -253,7 +253,7 @@ class Server:
 
             loss = criterion(output, targets.long())
             top_p, top_class = output.topk(1, dim=1)
-            equals = top_class == targets.view(*top_class.shape).long()
+            equals = top_class == targets.view(*top_class.shape).long() # HERE
             accuracy = torch.mean(equals.type(torch.FloatTensor))
             np_gt = y.flatten()
             np_pred = top_class.squeeze().cpu().detach().numpy()
