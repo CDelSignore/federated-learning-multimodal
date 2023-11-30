@@ -219,6 +219,10 @@ class Server:
         Returns:
             A tuple containing loss and accuracy values
         """
+
+        classes, instances = np.unique(data_test["y"], return_index = True)
+        class_accuracy = []
+
         self.global_ae.eval()
         self.global_sv.eval()
         if self.criterion == "CrossEntropyLoss":
