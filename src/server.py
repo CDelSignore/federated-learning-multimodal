@@ -220,8 +220,13 @@ class Server:
             A tuple containing loss and accuracy values
         """
 
-        classes, instances = np.unique(data_test["y"], return_counts = True)
-        class_accuracy = [0] * len(classes)
+        # Gets each unique label in the test data and the number of occurances
+        labels, instances = np.unique(data_test["y"], return_counts = True)
+
+        # classes["label"] = [correct_predications, total_instances]
+        classes = {}
+        for i in range(len(labels)):
+            classes[labels[i]] = [0, instances[i]]
 
         self.global_ae.eval()
         self.global_sv.eval()
@@ -265,5 +270,13 @@ class Server:
 
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
-
+            
+            # Increment label's correct_prediction count for each correct guess
+            y = y.flatten()
+            equals = equals.flatten().numpy()
+            for i in range(len(equals)):
+                classes[y[i]][0] += equals[i]
+        
+        print(classes)
+        exit()
         return np.mean(win_loss), np.mean(win_accuracy), np.mean(win_f1)
