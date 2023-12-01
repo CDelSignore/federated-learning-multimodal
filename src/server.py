@@ -125,6 +125,14 @@ class Server:
         seq = torch.from_numpy(x).double().to(self.device)
         y = y_train[:, idx_start:idx_end]
 
+        # Gets each unique label in the train data and the number of occurances
+        labels, instances = np.unique(y, return_counts=True)
+
+        # classes["label"] = [correct_predictions, total_instances]
+        classes = {}
+        for i in range(len(labels)):
+            classes[labels[i]] = [0, instances[i]]
+
         with torch.no_grad():
             rpts = self.global_ae.encode(seq, label_modality)
         targets = torch.from_numpy(y.flatten()).to(self.device)
@@ -142,7 +150,13 @@ class Server:
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-        return loss.item(), accuracy
+        # Increment label's correct_prediction count for each correct guess
+        y = y.flatten()
+        equals = equals.flatten().numpy()
+        for i in range(len(equals)):
+            classes[y[i]][0] += equals[i]
+
+        return loss.item(), accuracy, classes
 
     def update(self, local_models):
         """Updates the global model using received local models.
@@ -186,7 +200,7 @@ class Server:
                     idx_start = idx_end
                     idx_end += win_len
                     idx_end = min(idx_end, seq_len)
-                    loss, accuracy = self.train_classifier(
+                    loss, accuracy, classes = self.train_classifier(
                         "A", optimizer, criterion, x_A_train, y_A_train, idx_start, idx_end)
                     epoch_loss.append(loss)
                     epoch_accuracy.append(accuracy)
@@ -200,7 +214,7 @@ class Server:
                     idx_start = idx_end
                     idx_end += win_len
                     idx_end = min(idx_end, seq_len)
-                    loss, accuracy = self.train_classifier(
+                    loss, accuracy, classes = self.train_classifier(
                         "B", optimizer, criterion, x_B_train, y_B_train, idx_start, idx_end)
                     epoch_loss.append(loss)
                     epoch_accuracy.append(accuracy)
@@ -208,7 +222,7 @@ class Server:
             round_loss.append(np.mean(epoch_loss))
             round_accuracy.append(np.mean(epoch_accuracy))
 
-        return np.mean(round_loss), np.mean(round_accuracy)
+        return np.mean(round_loss), np.mean(round_accuracy), classes
 
     def eval(self, data_test):
         """Evaluates global models against testing data on the server.
@@ -277,6 +291,4 @@ class Server:
             for i in range(len(equals)):
                 classes[y[i]][0] += equals[i]
         
-        print(classes)
-        exit()
-        return np.mean(win_loss), np.mean(win_accuracy), np.mean(win_f1)
+        return np.mean(win_loss), np.mean(win_accuracy), np.mean(win_f1), classes
