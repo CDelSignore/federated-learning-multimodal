@@ -220,7 +220,7 @@ class Server:
             A tuple containing loss and accuracy values
         """
 
-        classes, instances = np.unique(data_test["y"], return_index = True)
+        classes, instances = np.unique(data_test["y"], return_counts = True)
         class_accuracy = [0] * len(classes)
 
         self.global_ae.eval()
