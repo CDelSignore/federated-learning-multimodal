@@ -291,10 +291,21 @@ def cross_modality_comparison():
                             bbox_inches="tight")
 
 
-def main():
-    single_multi_modality_comparison()
-    cross_modality_comparison()
+def per_class_comparison():
+    # Get paths to each parent folder containing result data
+    result_modalities = [os.path.abspath(root) for root, dirs, files in os.walk("./results") for name in files if name == "results.txt"]
+    
+    for folder in result_modalities:
+        # Load train, test, result data
 
+        # Plot per-class train, per-class test, overall accuracy (all by round) and class distribution in 4-panel
+        continue
+    
+
+def main():
+    #single_multi_modality_comparison()
+    #cross_modality_comparison()
+    per_class_comparison()
 
 if __name__ == "__main__":
     main()
