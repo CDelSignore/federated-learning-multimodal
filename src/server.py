@@ -152,7 +152,7 @@ class Server:
 
         # Increment label's correct_prediction count for each correct guess
         y = y.flatten()
-        equals = equals.flatten().numpy()
+        equals = equals.flatten().cpu().numpy()
         for i in range(len(equals)):
             classes[y[i]][0] += equals[i]
 
@@ -287,7 +287,7 @@ class Server:
             
             # Increment label's correct_prediction count for each correct guess
             y = y.flatten()
-            equals = equals.flatten().numpy()
+            equals = equals.flatten().cpu().numpy()
             for i in range(len(equals)):
                 classes[y[i]][0] += equals[i]
         
