@@ -294,12 +294,42 @@ def cross_modality_comparison():
 def per_class_comparison():
     # Get paths to each parent folder containing result data
     result_modalities = [os.path.abspath(root) for root, dirs, files in os.walk("./results") for name in files if name == "results.txt"]
+    result_modalities = [result_modalities[0]]
     
     for folder in result_modalities:
         # Load train, test, result data
 
         # Plot per-class train, per-class test, overall accuracy (all by round) and class distribution in 4-panel
-        continue
+        x = range(100)
+        y = range(100)
+        fig = plt.figure()
+        fig.suptitle(os.path.basename(folder))
+
+        ax1 = fig.add_subplot(221)
+        ax1.set_title("Per-Class Train Accuracy")
+        ax1.set_xlabel("Round")
+        ax1.set_xlim(0, 50)
+        ax1.set_ylabel("Accuracy")
+
+        ax2 = fig.add_subplot(222)
+        ax2.set_title("Per-Class Test Accuracy")
+        ax2.set_xlabel("Round")
+        ax2.set_xlim(0, 50)
+        ax2.set_ylabel("Accuracy")
+
+        ax3 = fig.add_subplot(223)
+        ax3.set_title("Overall Model Accuracy")
+        ax3.set_xlabel("Round")
+        ax3.set_xlim(0, 50)
+        ax3.set_ylabel("Accuracy")
+
+        ax4 = fig.add_subplot(224)
+        ax4.set_title("Class Distribution")
+        ax4.set_xlabel("Class (Label)")
+        ax4.set_xlim(0, 3) # will be number of classes
+        ax4.set_ylabel("Occurances")
+
+        plt.show()
     
 
 def main():
