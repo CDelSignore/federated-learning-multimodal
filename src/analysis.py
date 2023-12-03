@@ -294,7 +294,6 @@ def cross_modality_comparison():
 def per_class_comparison():
     # Get paths to each parent folder containing result data
     result_modalities = [os.path.abspath(root) for root, dirs, files in os.walk("./results") for name in files if name == "results.txt"]
-    result_modalities = [result_modalities[0]]
     
     for folder in result_modalities:
         # Load train, test, result data
