@@ -301,9 +301,8 @@ def per_class_comparison():
     result_modalities = [os.path.abspath(root) for root, dirs, files in os.walk("./results") for name in files if name == "results.txt"]
 
     for folder in result_modalities:
-        print(folder)
         # Create a figure
-        fig = plt.figure(figsize=(15,12))
+        fig = plt.figure(figsize=(18,12))
         fig.suptitle(os.path.basename(folder), fontsize=20, weight="bold")
 
         # Load data from results files
@@ -312,7 +311,7 @@ def per_class_comparison():
         result_data = np.loadtxt(os.path.join(folder, "results.txt"), delimiter=',')
         train_classes = np.unique(train_data[:,1])
         test_classes = np.unique(test_data[:,1])
-        train_distribution, test_distribution = np.zeros(len(train_classes)), np.zeros(len(test_classes))
+        train_distribution, test_distribution = np.zeros(int(np.max(train_classes)+1)), np.zeros(int(np.max(test_classes)+1))
 
         # Split per-class data into subarrays based on label
         train_data = np.split(train_data, np.unique(train_data[:,0], return_index=True)[1])[1:]
@@ -324,14 +323,14 @@ def per_class_comparison():
             subplt.set_title(subtitles[i], fontsize=14, weight="bold")
             subplt.set_xlabel(xlabels[i], fontsize=12)
             subplt.set_ylabel(ylabels[i], fontsize=12)
-            if (ylabels[i] == "Accuracy"): subplt.set_ylim(0,1.1)
+            if (ylabels[i] == "Accuracy"): subplt.set_ylim(-0.1,1.1)
             
             # Training Per-Class Accuracy
             if(i==0):
                 subplt.set_xlim(1, len(train_data))
 
                 x = np.arange(1, len(train_data)+1)
-                accuracies = np.empty((len(train_classes), len(x)))
+                accuracies = np.empty((int(np.max(train_classes)+1), len(x)))
                 accuracies[:] = np.nan
                 
                 for round in train_data:
@@ -341,14 +340,16 @@ def per_class_comparison():
                 for y in accuracies:
                     subplt.plot(x, y)
 
-                subplt.legend(["class"+str(int(lbl)) for lbl in train_classes], loc="lower right")
+                box = subplt.get_position()
+                subplt.set_position([box.x0, box.y0, box.width * .8, box.height])
+                subplt.legend(["class"+str(int(lbl)) for lbl in train_classes], loc="center left", bbox_to_anchor=(1, 0.5))
             
             # Testing Per-Class Accuracy
             elif(i==1):
                 subplt.set_xlim(1, len(train_data))
 
                 x = list(range(1, len(train_data), 2))
-                accuracies = np.empty((len(test_classes), len(x)))
+                accuracies = np.empty((int(np.max(test_classes)+1), len(x)))
                 accuracies[:] = np.nan
                 
                 for round in test_data:
@@ -358,7 +359,9 @@ def per_class_comparison():
                 for y in accuracies:
                     subplt.plot(x, y)
 
-                subplt.legend(["class"+str(int(lbl)) for lbl in test_classes], loc="lower right")
+                box = subplt.get_position()
+                subplt.set_position([box.x0, box.y0, box.width * .8, box.height])
+                subplt.legend(["class"+str(int(lbl)) for lbl in test_classes], loc="center left", bbox_to_anchor=(1, 0.5))
             
             # Overall Accuracy
             elif(i==2):
@@ -370,7 +373,10 @@ def per_class_comparison():
                 
                 subplt.plot(x, train_y)
                 subplt.plot(x, test_y)
-                subplt.legend(["Training", "Testing"], loc="lower right")
+
+                box = subplt.get_position()
+                subplt.set_position([box.x0, box.y0, box.width * .8, box.height])
+                subplt.legend(["Training", "Testing"], loc="center left", bbox_to_anchor=(1, 0.5))
 
             # Class Distribution
             else:
@@ -380,13 +386,18 @@ def per_class_comparison():
                 subplt.bar(x+.2, train_distribution, .4)
                 x = np.arange(len(test_distribution))
                 subplt.bar(x-.2, test_distribution, .4)
+
+                box = subplt.get_position()
+                subplt.set_position([box.x0, box.y0, box.width * .8, box.height])
+                subplt.legend(["Training", "Testing"], loc="center left", bbox_to_anchor=(1, 0.5))
         
-            # Save the figure
-            prefix, suffix = folder.split(os.sep + "results" + os.sep)
-            fpath = os.path.join(prefix, "plots", suffix + ".pdf")
-            Path(os.path.dirname(fpath)).mkdir(parents=True, exist_ok=True)
-            #print("Saving", fpath)
-            plt.savefig(fpath)
+        # Save the figure
+        prefix, suffix = folder.split(os.sep + "results" + os.sep)
+        fpath = os.path.join(prefix, "plots", suffix + ".pdf")
+        Path(os.path.dirname(fpath)).mkdir(parents=True, exist_ok=True)
+        print("Saving", fpath)
+        plt.savefig(fpath)
+        plt.close(fig)
     
 
 def main():
