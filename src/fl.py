@@ -101,16 +101,17 @@ class FL:
             results_path = os.path.join(self.results_path, f"rep_{self.rank}")
         else:
             results_path = self.results_path
+        fmt = '%3d', '%1.4e', '%1.4e', '%1.4e', '%1.4e', '%1.4e', '%1.4e'
         Path(results_path).mkdir(parents=True, exist_ok=True)
         np.savetxt(os.path.join(results_path, "results.txt"),
-                   result_table, delimiter=",", fmt="%1.4e")
+                   result_table, delimiter=",", fmt=fmt)
     
     def write_per_class(self, round, train, class_results):
         # Build an array where each entry is [label, sample_size, accuracy]
         results = []
         for key, values in class_results.items():
             correct, total = values
-            results.append([key, correct, total, correct/total])
+            results.append([round+1, key, correct, total, correct/total])
 
 
         if self.is_mpi:
@@ -118,7 +119,7 @@ class FL:
         else:
             results_path = self.results_path
 
-        fmt = '%s', '%d', '%d', '%.4f'
+        fmt = '%3d', '%2d', '%1.4e', '%1.4e', '%1.4e'
         mode = "w" if (round == 0) else "a"
         name = "train_perclass.txt" if train else "test_perclass.txt"
         Path(results_path).mkdir(parents=True, exist_ok=True)
