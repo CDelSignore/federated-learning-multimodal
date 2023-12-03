@@ -292,92 +292,106 @@ def cross_modality_comparison():
 
 
 def per_class_comparison():
+    subplots = [221, 222, 223, 224]
+    subtitles =  ["Per-Class Train Accuracy", "Per-Class Test Accuracy", "Overall Model Accuracy", "Class Distribution"]
+    xlabels = ["Round", "Round", "Round", "Class Number"]
+    ylabels = ["Accuracy", "Accuracy", "Accuracy", "Occurances"]
+
     # Get paths to each parent folder containing result data
     result_modalities = [os.path.abspath(root) for root, dirs, files in os.walk("./results") for name in files if name == "results.txt"]
-    
-    for folder in result_modalities:
-        # Load train, test, result data
 
-        # Plot per-class train, per-class test, overall accuracy (all by round) and class distribution in 4-panel
-        x = range(100)
-        y = range(100)
+    for folder in result_modalities:
+        print(folder)
+        # Create a figure
         fig = plt.figure(figsize=(15,12))
         fig.suptitle(os.path.basename(folder), fontsize=20, weight="bold")
 
+        # Load data from results files
         train_data = np.loadtxt(os.path.join(folder, "train_perclass.txt"), delimiter=',')
         test_data = np.loadtxt(os.path.join(folder, "test_perclass.txt"), delimiter=',')
         result_data = np.loadtxt(os.path.join(folder, "results.txt"), delimiter=',')
+        train_classes = np.unique(train_data[:,1])
+        test_classes = np.unique(test_data[:,1])
+        train_distribution, test_distribution = np.zeros(len(train_classes)), np.zeros(len(test_classes))
 
-        # Per-Class Train Accuracy
-        ax1 = fig.add_subplot(221)
-        ax1.set_title("Per-Class Train Accuracy", fontsize=14, weight="bold")
-        ax1.set_xlabel("Round", fontsize=12)
-        ax1.set_xlim(0, 100)
-        ax1.set_ylabel("Accuracy", fontsize=12)
-        classes, round = np.unique(train_data[:,0], return_counts=True)[0], range(0, np.unique(train_data[:,0], return_counts=True)[1][0])
-        accuracies = [ [] for i in range(len(classes)) ] 
-        for row in train_data:
-            accuracies[int(row[0])].append(row[3])
-        for i in range(len(accuracies)):
-            ax1.plot(round, accuracies[i], label=classes[i])
-        ax1.legend(classes, loc="lower right")
+        # Split per-class data into subarrays based on label
+        train_data = np.split(train_data, np.unique(train_data[:,0], return_index=True)[1])[1:]
+        test_data = np.split(test_data, np.unique(test_data[:,0], return_index=True)[1])[1:]
 
-        # Per-Class Test Accuracy
-        ax2 = fig.add_subplot(222)
-        ax2.set_title("Per-Class Test Accuracy", fontsize=14, weight="bold")
-        ax2.set_xlabel("Round", fontsize=12)
-        ax2.set_xlim(0, 50)
-        ax2.set_ylabel("Accuracy", fontsize=12)
-        classes, round = np.unique(test_data[:,0], return_counts=True)[0], range(0, np.unique(test_data[:,0], return_counts=True)[1][0])
-        accuracies = [ [] for i in range(len(classes)) ] 
-        for row in test_data:
-            accuracies[int(row[0])].append(row[3])
-        for i in range(len(accuracies)):
-            ax2.plot(round, accuracies[i], label=classes[i])
-        ax2.legend(classes, loc="lower right")
+        # Generate subplots
+        for i in range(len(subplots)):
+            subplt = fig.add_subplot(subplots[i])
+            subplt.set_title(subtitles[i], fontsize=14, weight="bold")
+            subplt.set_xlabel(xlabels[i], fontsize=12)
+            subplt.set_ylabel(ylabels[i], fontsize=12)
+            if (ylabels[i] == "Accuracy"): subplt.set_ylim(0,1.1)
+            
+            # Training Per-Class Accuracy
+            if(i==0):
+                subplt.set_xlim(1, len(train_data))
 
-        # Overall Model Accuracy
-        ax3 = fig.add_subplot(223)
-        ax3.set_title("Overall Model Accuracy", fontsize=14, weight="bold")
-        ax3.set_xlabel("Round", fontsize=12)
-        ax3.set_xlim(0, 100)
-        ax3.set_ylabel("Accuracy", fontsize=12)
-        round, test, train = ([],[],[])
-        for row in result_data:
-            round.append(row[0])
-            train.append(row[3])
-            test.append(row[5])
-        ax3.plot(round, train, label="Training")
-        ax3.plot(round, test, label="Testing")
-        ax3.legend(["Training", "Testing"])
+                x = np.arange(1, len(train_data)+1)
+                accuracies = np.empty((len(train_classes), len(x)))
+                accuracies[:] = np.nan
+                
+                for round in train_data:
+                    for label in round:
+                        accuracies[int(label[1])][int(label[0])-1] = label[4]
+                        train_distribution[int(label[1])] += label[3]
+                for y in accuracies:
+                    subplt.plot(x, y)
 
-        # Class Distribution
-        ax4 = fig.add_subplot(224)
-        ax4.set_title("Class Distribution", fontsize=14, weight="bold")
-        ax4.set_xlabel("Class (Label)", fontsize=12)
-        ax4.set_xlim(-1, max(len(np.unique(train_data[:,0])), len(np.unique(test_data[:,0]))))
-        ax4.set_ylabel("Occurances", fontsize=12)
-        accuracies = [ [] for i in range(len(np.unique(train_data[:,0]))) ]
-        for row in train_data:
-            accuracies[int(row[0])].append(row[2])
-        accuracies = [ np.mean(label) for label in accuracies ]
-        ax4.bar(classes-.1, accuracies, 0.1)
-        accuracies = [ [] for i in range(len(np.unique(test_data[:,0]))) ]
-        for row in test_data:
-            accuracies[int(row[0])].append(row[2])
-        accuracies = [ np.mean(label) for label in accuracies ]
-        ax4.bar(classes+.1, accuracies, 0.1)
-        ax4.legend(["Training", "Testing"])
+                subplt.legend(["class"+str(int(lbl)) for lbl in train_classes], loc="lower right")
+            
+            # Testing Per-Class Accuracy
+            elif(i==1):
+                subplt.set_xlim(1, len(train_data))
 
-        path1, path2 = folder.split("/results/")
-        fullpath = os.path.join(path1, "plots", path2+".pdf")
-        Path(os.path.dirname(fullpath)).mkdir(parents=True, exist_ok=True)
-        plt.savefig(fullpath)
+                x = list(range(1, len(train_data), 2))
+                accuracies = np.empty((len(test_classes), len(x)))
+                accuracies[:] = np.nan
+                
+                for round in test_data:
+                    for label in round:
+                        accuracies[int(label[1])][int(label[0]/2)] = label[4]
+                        test_distribution[int(label[1])] += label[3]
+                for y in accuracies:
+                    subplt.plot(x, y)
+
+                subplt.legend(["class"+str(int(lbl)) for lbl in test_classes], loc="lower right")
+            
+            # Overall Accuracy
+            elif(i==2):
+                subplt.set_xlim(1, len(train_data))
+                
+                x = result_data[:,0]
+                train_y = result_data[:,3]  # overall train accuracy
+                test_y = result_data[:,5]  # overall test  accuracy
+                
+                subplt.plot(x, train_y)
+                subplt.plot(x, test_y)
+                subplt.legend(["Training", "Testing"], loc="lower right")
+
+            # Class Distribution
+            else:
+                subplt.set_xticks(np.arange(-1, len(train_distribution), 1))
+                subplt.set_yscale("log")
+                x = np.arange(len(train_distribution))
+                subplt.bar(x+.2, train_distribution, .4)
+                x = np.arange(len(test_distribution))
+                subplt.bar(x-.2, test_distribution, .4)
+        
+            # Save the figure
+            prefix, suffix = folder.split(os.sep + "results" + os.sep)
+            fpath = os.path.join(prefix, "plots", suffix + ".pdf")
+            Path(os.path.dirname(fpath)).mkdir(parents=True, exist_ok=True)
+            #print("Saving", fpath)
+            plt.savefig(fpath)
     
 
 def main():
-    single_multi_modality_comparison()
-    cross_modality_comparison()
+    #single_multi_modality_comparison()
+    #cross_modality_comparison()
     per_class_comparison()
 
 if __name__ == "__main__":
