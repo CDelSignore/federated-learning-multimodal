@@ -377,8 +377,8 @@ def per_class_comparison():
     
 
 def main():
-    #single_multi_modality_comparison()
-    #cross_modality_comparison()
+    single_multi_modality_comparison()
+    cross_modality_comparison()
     per_class_comparison()
 
 if __name__ == "__main__":
