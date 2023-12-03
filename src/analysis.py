@@ -302,34 +302,78 @@ def per_class_comparison():
         # Plot per-class train, per-class test, overall accuracy (all by round) and class distribution in 4-panel
         x = range(100)
         y = range(100)
-        fig = plt.figure()
-        fig.suptitle(os.path.basename(folder))
+        fig = plt.figure(figsize=(15,12))
+        fig.suptitle(os.path.basename(folder), fontsize=20, weight="bold")
 
+        train_data = np.loadtxt(os.path.join(folder, "train_perclass.txt"), delimiter=',')
+        test_data = np.loadtxt(os.path.join(folder, "test_perclass.txt"), delimiter=',')
+        result_data = np.loadtxt(os.path.join(folder, "results.txt"), delimiter=',')
+
+        # Per-Class Train Accuracy
         ax1 = fig.add_subplot(221)
-        ax1.set_title("Per-Class Train Accuracy")
-        ax1.set_xlabel("Round")
-        ax1.set_xlim(0, 50)
-        ax1.set_ylabel("Accuracy")
+        ax1.set_title("Per-Class Train Accuracy", fontsize=14, weight="bold")
+        ax1.set_xlabel("Round", fontsize=12)
+        ax1.set_xlim(0, 100)
+        ax1.set_ylabel("Accuracy", fontsize=12)
+        classes, round = np.unique(train_data[:,0], return_counts=True)[0], range(0, np.unique(train_data[:,0], return_counts=True)[1][0])
+        accuracies = [ [] for i in range(len(classes)) ] 
+        for row in train_data:
+            accuracies[int(row[0])].append(row[3])
+        for i in range(len(accuracies)):
+            ax1.plot(round, accuracies[i], label=classes[i])
+        ax1.legend(classes, loc="lower right")
 
+        # Per-Class Test Accuracy
         ax2 = fig.add_subplot(222)
-        ax2.set_title("Per-Class Test Accuracy")
-        ax2.set_xlabel("Round")
+        ax2.set_title("Per-Class Test Accuracy", fontsize=14, weight="bold")
+        ax2.set_xlabel("Round", fontsize=12)
         ax2.set_xlim(0, 50)
-        ax2.set_ylabel("Accuracy")
+        ax2.set_ylabel("Accuracy", fontsize=12)
+        classes, round = np.unique(test_data[:,0], return_counts=True)[0], range(0, np.unique(test_data[:,0], return_counts=True)[1][0])
+        accuracies = [ [] for i in range(len(classes)) ] 
+        for row in test_data:
+            accuracies[int(row[0])].append(row[3])
+        for i in range(len(accuracies)):
+            ax2.plot(round, accuracies[i], label=classes[i])
+        ax2.legend(classes, loc="lower right")
 
+        # Overall Model Accuracy
         ax3 = fig.add_subplot(223)
-        ax3.set_title("Overall Model Accuracy")
-        ax3.set_xlabel("Round")
-        ax3.set_xlim(0, 50)
-        ax3.set_ylabel("Accuracy")
+        ax3.set_title("Overall Model Accuracy", fontsize=14, weight="bold")
+        ax3.set_xlabel("Round", fontsize=12)
+        ax3.set_xlim(0, 100)
+        ax3.set_ylabel("Accuracy", fontsize=12)
+        round, test, train = ([],[],[])
+        for row in result_data:
+            round.append(row[0])
+            train.append(row[3])
+            test.append(row[5])
+        ax3.plot(round, train, label="Training")
+        ax3.plot(round, test, label="Testing")
+        ax3.legend(["Training", "Testing"])
 
+        # Class Distribution
         ax4 = fig.add_subplot(224)
-        ax4.set_title("Class Distribution")
-        ax4.set_xlabel("Class (Label)")
-        ax4.set_xlim(0, 3) # will be number of classes
-        ax4.set_ylabel("Occurances")
+        ax4.set_title("Class Distribution", fontsize=14, weight="bold")
+        ax4.set_xlabel("Class (Label)", fontsize=12)
+        ax4.set_xlim(-1, max(len(np.unique(train_data[:,0])), len(np.unique(test_data[:,0]))))
+        ax4.set_ylabel("Occurances", fontsize=12)
+        accuracies = [ [] for i in range(len(np.unique(train_data[:,0]))) ]
+        for row in train_data:
+            accuracies[int(row[0])].append(row[2])
+        accuracies = [ np.mean(label) for label in accuracies ]
+        ax4.bar(classes-.1, accuracies, 0.1)
+        accuracies = [ [] for i in range(len(np.unique(test_data[:,0]))) ]
+        for row in test_data:
+            accuracies[int(row[0])].append(row[2])
+        accuracies = [ np.mean(label) for label in accuracies ]
+        ax4.bar(classes+.1, accuracies, 0.1)
+        ax4.legend(["Training", "Testing"])
 
-        plt.show()
+        path1, path2 = folder.split("/results/")
+        fullpath = os.path.join(path1, "plots", path2+".pdf")
+        Path(os.path.dirname(fullpath)).mkdir(parents=True, exist_ok=True)
+        plt.savefig(fullpath)
     
 
 def main():
