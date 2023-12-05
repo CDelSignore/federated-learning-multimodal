@@ -34,17 +34,17 @@ The following instructions assume a Linux installation. The project will run on 
 
 1.  Clone  this repository
     ```bash 
-    $ git clone git@github.com:CDelSignore/federated-learning-multimodal.git
+    git clone git@github.com:CDelSignore/federated-learning-multimodal.git
     ```
 
-2. Run the installation script which will download the latest version of Miniconda and install the listed dependencies in an environment named "deep-learning." It will also extract all the pre-processed data.
+2. Run the installation script **from the parent directory** which will download the latest version of Miniconda and install the listed dependencies in an environment named "deep-learning." It will also extract all the pre-processed data.
     ```bash
-    $ ./config/setup.sh
+    ./config/setup.sh
     ```
 
 3. Activate the newly created conda environment.
     ```bash
-    $ conda activate deep-learning
+    conda activate deep-learning
     ```
 
 ## (Optional) Generating Pre-Processed Data
