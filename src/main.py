@@ -12,10 +12,13 @@ def read_config(path):
 
     return config
 
-data_configs = [os.path.abspath(os.path.join(root, name)) for root, dirs, files in os.walk("./config") for name in files]
+def main():
+    # Scrub ./config directory and grab all config files
+    data_configs = [os.path.abspath(os.path.join(root, name)) for root, dirs, files in os.walk("./config") for name in files]
 
-for path in data_configs:
-    print(path)
-    config = read_config(path)
-    fl = FL(config)
-    fl.start()
+    # Run each config  TODO: reimplement MPI support
+    for path in data_configs:
+        print(path)
+        config = read_config(path)
+        fl = FL(config)
+        fl.start()
