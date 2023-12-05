@@ -65,7 +65,7 @@ The following instructions assume a Linux installation. The project will run on 
 
 ## Configuring and Running Experiments
 
-1. The `/config/` directory holds configuration files, each of which specifies the parameters for that run. The `/setup/config_example` file explains in detail how to properly configure an experiment.
+1. The `/config/` directory holds configuration files, each of which specifies the parameters for that run. The `/setup/config_example` file explains in detail how to properly configure an experiment. Do not add any superfluous files in this directory as it will break the config detection.
 
 2. By default, all config files in the `/config/` directory are run at once. Always run the program **from the parent directory**. This will take a long time if there are a lot of config files.
     ```bash
