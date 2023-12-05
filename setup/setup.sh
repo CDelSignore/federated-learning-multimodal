@@ -18,7 +18,7 @@ conda config --set solver libmamba
 if [ -z "$(conda env list | grep deep-learning)" ]; then conda env create --name deep-learning --file ./setup/environment.yml; fi
 
 # Extract preprocessed data
-mkdir ./data
+mkdir -p ./data
 tar -xzf mhealth.tar.gz -C ./data/
 tar -xzf opp.tar.gz -C ./data/
 tar -xzf ur_fall.tar.gz -C ./data/
