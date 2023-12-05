@@ -16,7 +16,7 @@ UMass Amherst ECE535: Networked Embedded System Design Fall 2023. This is an imp
 * *plots*: visualizations of results
 * *results*: comma-delimited experimental results
 * *src*: source code
-* *sub* pbs files for job submissions to clusters
+* *sub*: pbs files for job submissions to clusters
 
 
 ## Requirements
