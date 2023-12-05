@@ -4,7 +4,7 @@ UMass Amherst ECE535: Networked Embedded System Design Fall 2023. This is an imp
 
 ## Authors
 
-- [@CDelSignore](https://www.github.com/CDelSignore) is responsible for the implementtation details
+- [@CDelSignore](https://www.github.com/CDelSignore) is responsible for the implementation details
 - [@JulianCDay](https://github.com/JulianCDay) is responsible for the analysis of the collected data
 
 ## Directory Structure
