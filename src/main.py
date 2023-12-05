@@ -22,3 +22,6 @@ def main():
         config = read_config(path)
         fl = FL(config)
         fl.start()
+
+if __name__ == "__main__":
+    main()
