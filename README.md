@@ -71,5 +71,22 @@ The following instructions assume a Linux installation. The project will run on 
     ```bash
     python src/main.py
     ```
-    
-3. 
+
+3. Each experiment will result in three files in a corresponding filepath within `/results/`. These files are:
+    * `perclass_train.txt` : [round, correct, total, accuracy] for training data
+    * `perclass_test.txt` : [round, correct, total, accuracy] for testing data
+    * `results.txt` : [round, local_ae_loss, train_loss, train_accuracy, test_loss, test_f1] overall
+
+## (TODO) Clustering
+The original repository allowed for running groups of experiments on clusters. This functionality is not implemented with the changes on this implementation, but may be restored at a later date. See the original repository if this is a critical feature.
+
+## Analysis
+
+1. After running experiments, run the analysis script *from the parent directory*:
+    ```bash
+    python src/analysis.py
+    ```
+
+2. This will produce 4-subplot figures in a corresponding directory in `/plots/` with the per-class and overall data visualized.
+
+3. If you wish the replicate the visualizations from the original research paper, uncomment `#single_multi_modality_comparison()` and `#cross_modality_comparison()` in the script. Make sure you have run ALL the experiments before doing so.
